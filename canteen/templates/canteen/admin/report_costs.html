@@ -1,0 +1,141 @@
+{% extends 'canteen/base.html' %}
+{% block title %}Отчёт по затратам{% endblock %}
+{% block content %}
+
+<style>
+    .collapsible-row { display: none; }
+    .show-more-btn {
+        background: none; border: none; cursor: pointer;
+        color: var(--purple-600); font-size: 13px; font-weight: 600;
+        padding: 10px 0; display: flex; align-items: center; gap: 6px;
+    }
+    .show-more-btn:hover { color: var(--purple-800); }
+</style>
+
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+    <p style="color:#6b7280; font-size:14px;">
+        Период: <strong>{{ start_date|date:"d.m.Y" }}</strong> — <strong>{{ end_date|date:"d.m.Y" }}</strong>
+    </p>
+    <a href="/reports/" class="btn btn-outline">← Назад к отчётам</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><h3>{{ total_deposits }} ₽</h3><p>Пополнено балансов</p></div>
+    <div class="stat-card"><h3>{{ total_meal_cost }} ₽</h3><p>Потрачено на питание</p></div>
+    <div class="stat-card" style="{% if net >= 0 %}background:linear-gradient(135deg,#065f46,#059669){% else %}background:linear-gradient(135deg,#991b1b,#dc2626){% endif %}">
+        <h3>{{ net }} ₽</h3>
+        <p>{% if net >= 0 %}Профицит{% else %}Дефицит{% endif %}</p>
+    </div>
+    <div class="stat-card"><h3>{{ meals_count }}</h3><p>Порций выдано</p></div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+
+    <div class="card">
+        <h2>Пополнения по дням</h2>
+        {% if payments_by_day %}
+        <table>
+            <thead><tr><th>Дата</th><th>Транзакций</th><th>Сумма</th></tr></thead>
+            <tbody>
+                {% for row in payments_by_day %}
+                <tr{% if forloop.counter > 5 %} class="collapsible-row" data-group="pay-days"{% endif %}>
+                    <td>{{ row.created_at__date|date:"d.m.Y" }}</td>
+                    <td>{{ row.count }}</td>
+                    <td>{{ row.amount }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if payments_by_day|length > 5 %}
+        <button class="show-more-btn" onclick="toggleRows('pay-days', this)">
+            ▼ Показать все ({{ payments_by_day|length }})
+        </button>
+        {% endif %}
+        {% else %}
+        <p style="color:#9ca3af; font-size:14px;">Нет пополнений за выбранный период</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Расходы на питание по дням</h2>
+        {% if meals_by_day %}
+        <table>
+            <thead><tr><th>Дата</th><th>Порций</th><th>Сумма</th></tr></thead>
+            <tbody>
+                {% for row in meals_by_day %}
+                <tr{% if forloop.counter > 5 %} class="collapsible-row" data-group="meal-days"{% endif %}>
+                    <td>{{ row.date|date:"d.m.Y" }}</td>
+                    <td>{{ row.count }}</td>
+                    <td>{{ row.cost }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if meals_by_day|length > 5 %}
+        <button class="show-more-btn" onclick="toggleRows('meal-days', this)">
+            ▼ Показать все ({{ meals_by_day|length }})
+        </button>
+        {% endif %}
+        {% else %}
+        <p style="color:#9ca3af; font-size:14px;">Нет данных о питании за выбранный период</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="card">
+    <h2>Разбивка по ученикам</h2>
+    {% if students_data %}
+    <table>
+        <thead>
+            <tr>
+                <th>ФИО</th><th>Класс</th><th>Пополнено</th>
+                <th>Потрачено на питание</th><th>Порций</th><th>Баланс (изменение)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students_data %}
+            <tr{% if forloop.counter > 5 %} class="collapsible-row" data-group="students"{% endif %}>
+                <td>{{ s.name }}</td>
+                <td>{{ s.class_name }}</td>
+                <td>{{ s.deposits }} ₽</td>
+                <td>{{ s.meal_cost }} ₽</td>
+                <td>{{ s.meals }}</td>
+                <td style="font-weight:600; color:{% if s.net >= 0 %}#059669{% else %}#dc2626{% endif %}">
+                    {% if s.net >= 0 %}+{% endif %}{{ s.net }} ₽
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="background:var(--purple-50); font-weight:700;">
+                <td colspan="2">Итого</td>
+                <td>{{ total_deposits }} ₽</td>
+                <td>{{ total_meal_cost }} ₽</td>
+                <td>{{ meals_count }}</td>
+                <td style="color:{% if net >= 0 %}#059669{% else %}#dc2626{% endif %}">
+                    {% if net >= 0 %}+{% endif %}{{ net }} ₽
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    {% if students_data|length > 5 %}
+    <button class="show-more-btn" onclick="toggleRows('students', this)">
+        ▼ Показать все ({{ students_data|length }})
+    </button>
+    {% endif %}
+    {% else %}
+    <p style="color:#9ca3af; font-size:14px;">Нет данных за выбранный период</p>
+    {% endif %}
+</div>
+
+<script>
+function toggleRows(group, btn) {
+    const rows = document.querySelectorAll(`tr[data-group="${group}"]`);
+    const isHidden = getComputedStyle(rows[0]).display === 'none';
+    rows.forEach(r => r.style.display = isHidden ? 'table-row' : 'none');
+    btn.textContent = isHidden ? '▲ Свернуть' : `▼ Показать все (${rows.length + 5})`;
+}
+</script>
+
+{% endblock %}

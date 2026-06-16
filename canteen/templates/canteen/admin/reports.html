@@ -1,0 +1,46 @@
+{% extends 'canteen/base.html' %}
+{% block title %}Отчёты{% endblock %}
+{% block content %}
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+    <div class="card">
+        <h2>📋 Отчёт по питанию</h2>
+        <p style="color:#6b7280; font-size:13px; margin-bottom:20px;">
+            Сводка по полученным порциям: по дням, классам, блюдам и ученикам.
+        </p>
+        <form method="post" action="/reports/meals/">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Дата начала</label>
+                <input type="date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label>Дата окончания</label>
+                <input type="date" name="end_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Сформировать отчёт</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>💰 Отчёт по затратам</h2>
+        <p style="color:#6b7280; font-size:13px; margin-bottom:20px;">
+            Сравнение пополнений баланса и фактических расходов на питание по каждому ученику.
+        </p>
+        <form method="post" action="/reports/costs/">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Дата начала</label>
+                <input type="date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label>Дата окончания</label>
+                <input type="date" name="end_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Сформировать отчёт</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

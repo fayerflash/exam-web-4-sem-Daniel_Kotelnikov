@@ -1,0 +1,49 @@
+{% extends 'canteen/base.html' %}
+{% block title %}Статистика{% endblock %}
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card"><h3>{{ total_revenue }} ₽</h3><p>Общая выручка</p></div>
+    <div class="stat-card"><h3>{{ total_students }}</h3><p>Всего учеников</p></div>
+    <div class="stat-card"><h3>{{ total_meals }}</h3><p>Всего порций</p></div>
+</div>
+
+<div class="card">
+    <h2>Статистика по классам</h2>
+    <table>
+        <thead><tr><th>Класс</th><th>Учеников</th><th>Сумма платежей</th></tr></thead>
+        <tbody>
+            {% for class in class_stats %}
+            <tr><td>{{ class.class_name }}</td><td>{{ class.count }}</td><td>{{ class.total_payments|default:0 }} ₽</td></tr>
+            {% empty %}
+            <tr><td colspan="3">Нет данных</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Популярные блюда</h2>
+    <table>
+        <thead><tr><th>Блюдо</th><th>Цена</th><th>Заказов</th></tr></thead>
+        <tbody>
+            {% for dish in popular_dishes %}
+            <tr><td>{{ dish.dish__name }}</td><td>{{ dish.dish__price }} ₽</td><td>{{ dish.total_ordered }}</td></tr>
+            {% empty %}
+            <tr><td colspan="3">Нет данных</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h2>Платежи по дням (последние 30 дней)</h2>
+    <table>
+        <thead><tr><th>Дата</th><th>Сумма</th></tr></thead>
+        <tbody>
+            {% for item in payments_by_day %}
+            <tr><td>{{ item.date|date:"d.m.Y" }}</td><td>{{ item.amount }} ₽</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

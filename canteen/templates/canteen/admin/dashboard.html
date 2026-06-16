@@ -1,0 +1,19 @@
+{% extends 'canteen/base.html' %}
+{% block title %}Панель управления{% endblock %}
+{% block content %}
+
+<div class="stats-grid">
+    <div class="stat-card"><h3>{{ total_students }}</h3><p>Учеников</p></div>
+    <div class="stat-card"><h3>{{ total_dishes }}</h3><p>Блюд</p></div>
+    <div class="stat-card"><h3>{{ total_payments }} ₽</h3><p>Оплат сегодня</p></div>
+    <div class="stat-card"><h3>{{ today_meals }}</h3><p>Порций сегодня</p></div>
+    <div class="stat-card"><h3>{{ pending_requests }}</h3><p>Заявок</p></div>
+    <div class="stat-card"><h3>{{ total_revenue }} ₽</h3><p>Всего доход</p></div>
+</div>
+
+<div class="card">
+    <h2>Добро пожаловать, {{ user.username }}!</h2>
+    <p style="color: #6b7280; font-size: 14px;">Используйте боковое меню для навигации по разделам системы.</p>
+</div>
+
+{% endblock %}

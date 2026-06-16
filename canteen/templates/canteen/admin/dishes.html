@@ -1,0 +1,62 @@
+{% extends 'canteen/base.html' %}
+{% block title %}Блюда{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Добавить блюдо</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add">
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+            <label>Тип питания</label>
+            <select name="meal_type" required>
+                {% for mt in meal_types %}
+                <option value="{{ mt.id }}">{{ mt.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Цена</label>
+            <input type="number" step="0.01" name="price" required>
+        </div>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+            <label><input type="checkbox" name="is_available" checked> Доступно</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Добавить</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Список блюд</h2>
+    <table>
+        <thead><tr><th>Название</th><th>Тип</th><th>Цена</th><th>Статус</th><th>Действия</th></tr></thead>
+        <tbody>
+            {% for dish in dishes %}
+            <tr>
+                <td>{{ dish.name }}</td>
+                <td>{{ dish.meal_type.name }}</td>
+                <td>{{ dish.price }} ₽</td>
+                <td>{% if dish.is_available %}✅ Доступно{% else %}❌ Недоступно{% endif %}</td>
+                <td>
+                    <form method="post" style="display:inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="dish_id" value="{{ dish.id }}">
+                        <button type="submit" class="btn btn-danger" style="font-size:12px" onclick="return confirm('Удалить?')">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Нет блюд</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
